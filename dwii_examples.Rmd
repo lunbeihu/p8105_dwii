@@ -6,6 +6,7 @@ output: github_document
 
 ```{r, include = FALSE}
 library(tidyverse)
+library(httr)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -22,5 +23,58 @@ options(
 
 scale_colour_discrete = scale_color_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
+```
+
+
+## Restaurant inspections
+
+```{r}
+api_url = "https://data.cityofnewyork.us/resource/43nn-pn8j.csv"
+
+rest_inspections = 
+  GET(api_url, query = list("$limit" = 50000)) %>% 
+  content("parsed")
+```
+
+```{r}
+rest_inspections %>% 
+  count(boro, grade) %>% 
+  pivot_wider(names_from = grade, values_from = n)
+```
+
+```{r}
+rest_inspections =
+  rest_inspections %>% 
+  filter(grade %in% c("A", "B", "C"), boro != "0")
+```
+
+Let's look at pizza places.
+
+```{r}
+rest_inspections %>% 
+  mutate(dba = str_to_upper(dba)) %>% 
+  filter(str_detect(dba, "PIZZ"))
+```
+
+
+```{r}
+rest_inspections %>% 
+  mutate(dba = str_to_upper(dba)) %>% 
+  filter(str_detect(dba, "PIZZ")) %>% 
+  count(boro, grade) %>% 
+  pivot_wider(names_from = grade, values_from = n)
+```
+
+```{r}
+rest_inspections %>% 
+  mutate(dba = str_to_upper(dba)) %>% 
+  filter(str_detect(dba, "PIZZ")) %>% 
+  mutate(
+    boro = fct_infreq(boro),
+    boro = str_replace(boro, "Brooklyn", "Hipster")) %>% 
+  ggplot(aes(x = boro)) + 
+  geom_bar() +
+  facet_wrap(. ~ grade)
+  
 ```
 
