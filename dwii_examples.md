@@ -108,3 +108,29 @@ rest_inspections %>%
 ```
 
 <img src="dwii_examples_files/figure-gfm/unnamed-chunk-7-1.png" width="90%" />
+
+## Napoleon Dynamite
+
+Get some Napoleon Dynamite Amazon reviews.
+
+``` r
+nap_dyn_url = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=2"
+
+napoleon_html = read_html(nap_dyn_url)
+
+review_titles = 
+  napoleon_html %>% 
+  html_nodes(".a-text-bold span") %>% 
+  html_text()
+
+review_text = 
+  napoleon_html %>% 
+  html_nodes(".review-text-content span") %>% 
+  html_text()
+
+nap_df = 
+tibble(
+  titles = review_titles,
+  text = review_text
+)
+```
